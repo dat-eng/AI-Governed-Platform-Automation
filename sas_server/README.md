@@ -46,4 +46,24 @@ curl -X POST http://localhost:8000/api/v1/terraform/onboard \
       }'
 ```
 
+🧠 AI-Agent Compatibility Notes
+
+sas_server is intentionally designed to support ChatOps/AI governance integration:
+	•	✅ LLM-safe JSON responses with explicit fields (status, policy_applied, vault_role_used, next_actions)
+	•	✅ “Explain” routes for policy context enable AI reasoning layer
+	•	✅ Can be fronted by chat gateway like Slack, MS Teams, or custom LLM
+
+⸻
+
+📈 Roadmap (Platform Gateway Enhancements)
+	•	Add /explain plan endpoint → return Terraform/Sentinel JSON for agent summarization
+	•	Add /remediate drift → allow agent to trigger targeted terraform apply within guardrails
+	•	Add event hooks for Backstage/Developer Hub UI integration
+
+⸻
+
+📄 License
+
+Apache-2.0 (consistent with platform tooling repos)
+
 
