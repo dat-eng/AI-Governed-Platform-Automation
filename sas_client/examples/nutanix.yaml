@@ -1,0 +1,16 @@
+# Nutanix Config Variables
+project: "SSSD_SBX"
+owner_email: "john.doe@irs.gov"
+owner_seid: "kjnyb"
+server_data: '{
+  "hostname": "",
+  "location": "MTB",
+  "domain": "dstest.irsnet.gov",
+  "environment": "SBX",
+  "buildenv": "test",
+  "type": "application",
+  "os_type": "Linux",
+  "cpu": "",
+  "memory": "",
+  "software": ""
+}'

@@ -1,0 +1,5 @@
+owner: "terraform"
+repo: "project_scaffolding"
+project_name: "JETCS"
+# os_type defaults to linux if none given
+os_type: 

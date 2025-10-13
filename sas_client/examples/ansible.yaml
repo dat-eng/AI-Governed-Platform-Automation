@@ -1,0 +1,22 @@
+job_template_name: "paas_rhel_post_deploy_dev"
+job_data: '{
+  "irs_os": "RH9",
+  "hostname": "vs2wtdc605y07fh",
+  "serversupportgroup": "SERVER AUTOMATION AND IMAGE INFRASTRUCTURE SUPPORT",
+  "responsibleorg": "SERVER AUTOMATION AND IMAGE INFRASTRUCTURE SUPPORT",
+  "buildenv": "test",
+  "irs_location": "MTB",
+  "irs_environment": "SBX",
+  "irs_project": "SSSD_SBX",
+  "irs_contact": "",
+  "irs_email": "",
+  "irs_cpu": 8,
+  "irs_ram": 8,
+  "request_contact": "",
+  "request_email": "",
+  "barcode": "",
+  "software": [],
+  "immutable": true,
+  "dnf_update": true,
+  "run_bvr": true
+}'

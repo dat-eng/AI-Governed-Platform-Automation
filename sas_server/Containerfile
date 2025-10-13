@@ -1,0 +1,25 @@
+FROM ecp-non-prod.nexus-ecp.web.irs.gov/ubi9/python-312:9.6-1756995774-qcs-247
+
+# Set working directory early
+WORKDIR /app
+
+# Configure pip and copy dependencies in one step
+COPY --chown=default pip.conf requirements.txt ./ 
+# This is horrible; we'll likely to pull from Nexus
+# GitHub Action Workflow will need to pull the sas_client repo
+COPY --chown=default dist/sas_client-0.2.0-py3-none-any.whl ./
+
+# Install Python dependencies in one layer
+RUN mkdir -p ~/.pip \
+    && cp pip.conf ~/.pip/pip.conf \
+    && pip install sas_client-0.2.0-py3-none-any.whl \
+    && pip install -r requirements.txt
+
+# Copy application code
+COPY --chown=default app ./app
+
+# Set Python path
+#ENV PYTHONPATH="/app:$PYTHONPATH"
+
+# Run the application
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

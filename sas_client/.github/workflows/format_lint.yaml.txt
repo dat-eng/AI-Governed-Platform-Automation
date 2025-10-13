@@ -1,0 +1,58 @@
+name: Format and lint Python code
+
+on:
+  push:
+    branches: [ '**' ]          # build/push only from main
+    paths:
+      - 'requirements*.txt'
+      - "**/*.py"
+      - "pyproject.toml"
+  pull_request:
+    branches: [ '**' ]          # validate PRs (no push)
+    paths:
+      - 'requirements.txt'
+      - "**/*.py"
+      - "pyproject.toml"
+  workflow_dispatch:
+
+# Cancel older runs for the same branch/PR to save runners
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-ruff
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Use env vars instead of writing pip.conf
+  PIP_INDEX_URL: http://${{ secrets.NEXUS_USER }}:${{ secrets.NEXUS_PASS }}@vp2smemappimr01.sbx.com:8081/nexus/repository/public-py/simple
+  PIP_TRUSTED_HOST: vp2smemappimr01.sbx.com
+  PIP_DISABLE_PIP_VERSION_CHECK: '1'
+  PIP_TIMEOUT: '10'
+  PIP_RETRIES: '3'
+
+jobs:
+  ruff:
+    name: Ruff Lint & Format Check
+    runs-on: ghac-dev-ubi9
+    outputs:
+      output_data: ${{ steps.ruff_output.outputs.value }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install packages
+        run: |
+          sudo yum install -y pip
+          pip -V
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install Ruff
+        run: |
+          pip install ruff 
+
+      - name: Run ruff checks (lint + format check)
+        id: ruff_output
+        run: |
+          ruff check .
+          ruff format --check --diff .

@@ -1,0 +1,116 @@
+name: Build Image using Containerfile
+
+on:
+  push:
+    branches: [ main ]          # build/push only from main
+    paths:
+      - "Containerfile"
+      - 'requirements.txt'
+      - "**/*.py"
+  workflow_dispatch:
+    inputs:
+      push_image:
+        description: 'Force push image (true/false)'
+        required: false
+        default: 'false'
+
+# Cancel older runs for the same branch/PR to save runners
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-container
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PIP_INDEX_URL: 'http://${{ secrets.NEXUS_USER }}:${{ secrets.NEXUS_PASS }}@vp2smemappimr01.sbx.com:8081/nexus/repository/public-py/simple'
+  PIP_DISABLE_PIP_VERSION_CHECK: '1'
+  PIP_TIMEOUT: '10'
+  PIP_RETRIES: '3'
+  SHOULD_PUSH: >-
+    ${{ (github.event_name == 'push' && (github.ref == 'refs/heads/main'))
+        || (github.event_name == 'workflow_dispatch' && inputs.push_image == 'true') }}
+
+jobs:
+  ruff:
+    name: Ruff Lint & Format Check
+    uses: ./.github/workflows/format_lint.yaml
+    secrets: inherit
+
+  build:
+    name: Build image
+    runs-on: ghac-dev-ubi9
+    needs: ruff
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Download sas_client release whl file
+      env:
+        TOKEN: ${{ secrets.GH_PAT }}
+        API: ${{ github.api_url }}
+        TARGET_OWNER: terraform
+        TARGET_REPO: sas_client
+        RELEASE_TAG: latest
+        ASSET_NAME: sas_client-0.2.0-py3-none-any.whl
+        OUTPUT_PATH: dist
+      run: |
+        set -euo pipefail
+
+        mkdir -p ${OUTPUT_PATH}
+
+        # 1) Resolve release (by tag or 'latest')
+        if [[ "$RELEASE_TAG" == "latest" ]]; then
+          rel_json="$(curl -sfLH "Authorization: token $TOKEN" \
+            "$API/repos/$TARGET_OWNER/$TARGET_REPO/releases/latest")"
+        else
+          rel_json="$(curl -sfLH "Authorization: token $TOKEN" \
+            "$API/repos/$TARGET_OWNER/$TARGET_REPO/releases/tags/$RELEASE_TAG")"
+        fi
+
+        # 2) Find the asset id with matching name
+        asset_id="$(echo "$rel_json" | jq -r \
+          --arg NAME "$ASSET_NAME" '.assets[] | select(.name==$NAME) | .id')"
+
+        if [[ -z "$asset_id" || "$asset_id" == "null" ]]; then
+          echo "Asset '$ASSET_NAME' not found in release '$RELEASE_TAG' of $TARGET_OWNER/$TARGET_REPO"
+          exit 1
+        fi
+
+        # 3) Download (note the required Accept header)
+        curl -sfL \
+          -H "Authorization: token $TOKEN" \
+          -H "Accept: application/octet-stream" \
+          "$API/repos/$TARGET_OWNER/$TARGET_REPO/releases/assets/$asset_id" \
+          -o "$OUTPUT_PATH/$ASSET_NAME"
+
+        echo "Downloaded to $OUTPUT_PATH/$ASSET_NAME"
+
+    - name: Install packages
+      run: |
+        sudo yum install -y pip fuse-overlayfs slirp4netns dos2unix
+
+    - name: Check if python and pip are installed properly
+      run: |
+        pip -v
+
+    - name: Write pip.conf
+      run: |
+        cat > pip.conf <<EOF
+        [global]
+        timeout = 10
+        retries = 3
+        no-cache-dir = false
+        disable-pip-version-check = True
+        trusted-host = vp2smemappimr01.sbx.com
+        index-url = ${PIP_INDEX_URL}
+        EOF
+
+    - name: Podman login
+      run: podman login ecp-non-prod.nexus-ecp.com --tls-verify=false -u ${{ secrets.REGISTRY_USER }} -p ${{ secrets.REGISTRY_PASS }}
+
+    - name: Podman build
+      run: podman build -t sas_server:latest .
+
+    - name: Podman push
+      if: env.SHOULD_PUSH == 'true'
+      run: podman push sas_server:latest ecp-non-prod.nexus-ecp.com/sas/sas_server:latest

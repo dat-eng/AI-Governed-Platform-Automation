@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=80.9.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sas_client"
+version = "0.2.0"
+description = "Standardized API Endpoint Client"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{name="SAS Devs"}]
+
+# Tell setuptools that dependencies and version come from elsewhere
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+# Single source of truth for runtime requirements
+dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[project.scripts]
+launcher = "sas_client.cli.cli:main"
+
+# (Optional) extras, each sourced from its own file—also no duplication
+[project.optional-dependencies]
+test = []
+dev = []
+
+[tool.setuptools.dynamic.optional-dependencies]
+test = { file = ["requirements-test.txt"] }
+dev  = { file = ["requirements-dev.txt"] }
+
+#[tool.pytest.ini_options]
+#addopts = "-q"
+#testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+lint.extend-select = ["B","I"]  # import sorting
+format.docstring-code-format = true
+lint.extend-fixable = ["B"]

@@ -1,0 +1,126 @@
+import json 
+import re
+import requests
+import time
+import logging
+import urllib3
+import urllib.parse
+from requests.auth import AuthBase
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
+from string import Template
+from typing import List, Union
+from sas.api_client import APIClient, TokenAuth
+
+logger = logging.getLogger(__name__)
+
+class VmaApi(Api):
+    def __init__(self, base_url: str, token: str):
+        """ Initialize API client with session, authentication, and retries. """
+        super().__init__(base_url, token)
+
+        # Get Bearer Token
+        self._token = self._Api__get_bearer_token(token)
+        logger.debug("Got Bearer Credentials")
+
+        # Apply authentication token to session
+        self._session.auth = TokenAuth(self._token)
+
+    PATH_LOGIN = "/iaas/api/login/"
+    PATH_PROJECTS = "/iaas/api/projects/"
+    PATH_CATALOGS = "/catalog/api/admin/sources/"
+    PATH_POLICIES = "/policy/api/policies/"
+    PATH_DEPLOYMENT_TEMPLATE = Template("/deployment/api/deployments/$deployment_id")
+    PATH_DEPLOYMENT_REQUESTS_TEMPLATE = Template("/deployment/api/deployments/$deployment_id/requests")
+    PATH_CATALOG_REQUEST_TEMPLATE = Template("/catalog/api/items/$catalog_id/request")
+
+    def find_project_by_name(self, name: str):
+        """Search for a project and return its ID"""
+        path = self.PATH_PROJECTS
+        #response = self._Api__get(path=path)
+        response = self.get(path=path)
+        results = response.get("content", [])
+
+        # Search for exact name matches
+        # Note: We have to search because a search for 'foo' would return entries
+        #       that include 'foo', 'foobar', 'myfoo'.
+        #matches = self._Api__find(name=name, results=results)
+        matches = self.find(name=name, results=results)
+
+        # We should only have one match
+        if len(matches) > 1:
+            raise exception_factory(RuntimeError, f"Found {len(matches)} projects with name {name}.")
+
+        # No matches
+        if len(matches) < 1:
+            #raise exception_factory(RuntimeError, f"Did not find project with name {name}.")
+            return None
+
+        # Return the project details
+        return {
+            "name": name,
+            "id": matches[0].get("id"),
+            "administrators": matches[0].get("administrators"),
+            "members": matches[0].get("members"),
+            "viewers": matches[0].get("viewers"),
+            "supervisors": matches[0].get("supervisors"),
+            "zones": matches[0].get("zones")
+        }
+
+    def get_source_project(self, name:str) -> dict:
+        """Get source project details"""
+        project = self.find_project_by_name(name=name)
+
+        return project
+
+    def request_catalog_item(self, catalog_id: str, data: dict) -> dict:
+        """Request catalog item"""
+        path = self.PATH_CATALOG_REQUEST_TEMPLATE.substitute({"catalog_id": catalog_id})
+
+        #response = self._Api__post(path=path, data=data)
+        response = self.post(path=path, data=data)
+
+        return response
+
+    def get_deployment(self, deployment_id:str) -> dict:
+        """Get deployment"""
+        path = self.PATH_DEPLOYMENT_TEMPLATE.substitute({"deployment_id": deployment_id})
+        #response = self._Api__get(path=path)
+        response = self.get(path=path)
+
+        return response
+
+    def get_deployment_status(self, deployment: dict):
+        """Retrieve the status of a deployment"""
+        deployment_id = deployment.get('deploymentId')
+        response = self.get_deployment(deployment_id=deployment_id)
+        return response.get("status")
+
+    def wait_for_deployment_completion(self, deployment: dict, interval: int = 5, max_timeout_seconds: int = 300):
+        """Wait for a deployment to complete, checking the status at the specified interval."""
+        start_time = time.time()
+        interval_count = 0
+
+        for _ in range(0, max_timeout_seconds, interval):
+            time.sleep(interval)
+            status = self.get_deployment_status(deployment=deployment)
+
+            if status == 'CREATE_SUCCESSUL':
+                logger.info('Deployment %s: %s', deployment.get('deploymentId'), status)
+                return status
+            else:
+                elapsed_time = time.time() - start_time
+                elapsed_seconds = time.strftime("%S".format(str(elapsed_time % 1)[2:]), time.gmtime(elapsed_time))
+
+                if int(elapsed_seconds) >= max_timeout_seconds:
+                    logger.error(f'Deployment %s has reached the %ss timeout', deployment.get('deploymentId'), max_timeout_seconds)
+
+                    status = self.get_deployment_status(deployment=deployment)
+
+                    return status
+                else:
+                    logger.info('Deployment %s: %s... [%ss elapsed (Max: %ss)]', deployment.get('deploymentId'), status, interval_count, max_timeout_seconds)
+                interval_count += interval
+
+if __name__ == "__main__":
+    print("Import as a module to use")
