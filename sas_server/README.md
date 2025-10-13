@@ -49,9 +49,9 @@ curl -X POST http://localhost:8000/api/v1/terraform/onboard \
 ## 🧠 AI-Agent Compatibility Notes
 
 sas_server is intentionally designed to support ChatOps/AI governance integration:
-	•	✅ LLM-safe JSON responses with explicit fields (status, policy_applied, vault_role_used, next_actions)
-	•	✅ “Explain” routes for policy context enable AI reasoning layer
-	•	✅ Can be fronted by chat gateway like Slack, MS Teams, or custom LLM
+- ✅ LLM-safe JSON responses with explicit fields (status, policy_applied, vault_role_used, next_actions)
+- ✅ “Explain” routes for policy context enable AI reasoning layer
+- ✅ Can be fronted by chat gateway like Slack, MS Teams, or custom LLM
 
 ⸻
 
@@ -65,6 +65,7 @@ sas_server is intentionally designed to support ChatOps/AI governance integratio
 📄 License
 
 Apache-2.0 (consistent with platform tooling repos)
+
 
 
 
