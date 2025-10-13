@@ -14,35 +14,29 @@ This framework turns platform actions like *“Provision Snowflake SBX with Vaul
 ---
 
 ## 🧠 High-Level Architecture
-┌───────────────────────────────────────────────────────────────────────────┐
-│                 AI Agent / ChatOps / Developer CLI UI                     │
-│                   (Natural Language or CLI Command)                       │
-└───────────────────────────────────────────────────────────────────────────┘
-│
-▼
-┌───────────────────────────────────────────────────────────────────────────┐
-│                   FastAPI Service Layer (sas_server)                      │
-│  - Receives intent or API calls                                           │
-│  - Validates policy context (SBX/DEV/PROD, ownership, tags)               │
-│  - Authenticates via Vault-issued token                                   │
-└───────────────────────────────────────────────────────────────────────────┘
-│
-▼
-┌───────────────────────────────────────────────────────────────────────────┐
-│                Python Orchestration Client (sas_client)                   │
-│  - Wraps Nutanix Calm, Terraform, Infoblox, Vault, Ansible APIs           │
-│  - Encapsulates provisioning logic into reusable modules                  │
-│  - Enforces Zero-Trust — no static credentials ever stored                │
-└───────────────────────────────────────────────────────────────────────────┘
-│
-▼
-┌───────────────────────────────────────────────────────────────────────────┐
-│  Provisioning Layer: Nutanix Calm • Terraform + Sentinel • Infoblox • Vault│
-│  - Calm builds infrastructure                                             │
-│  - Terraform applies policy-as-code and tags                              │
-│  - Vault issues short-lived tokens                                        │
-│  - Infoblox registers IP/DNS securely                                     │
-└───────────────────────────────────────────────────────────────────────────┘
+
+### AI Agent / ChatOps / Developer CLI UI ###    
+- Natural Language
+- CLI Command
+
+
+### FastAPI Service Layer (sas_server) ###                    
+- Receives intent or API calls                                           
+- Validates policy context (SBX/DEV/PROD, ownership, tags)               
+- Authenticates via Vault-issued token                                   
+
+
+### Python Orchestration Client (sas_client) ###                   
+- Wraps Nutanix Calm, Terraform, Infoblox, Vault, Ansible APIs           
+- Encapsulates provisioning logic into reusable modules                  
+- Enforces Zero-Trust — no static credentials ever stored                
+
+
+### Provisioning Layer: Nutanix Calm • Terraform + Sentinel • Infoblox • Vault ###
+- Calm builds infrastructure                                             
+- Terraform applies policy-as-code and tags                              
+- Vault issues short-lived tokens                                        
+- Infoblox registers IP/DNS securely                                     
 
 ---
 
