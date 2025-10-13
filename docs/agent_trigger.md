@@ -16,7 +16,7 @@ Allow a developer or AI agent to request:
 
 ## 🧠 Natural Language to API Translation (Conceptual Flow)
 
-⟶ “Provision Snowflake SBX for Alice with FedRAMP policy”
+ > _“Provision a Snowflake SBX environment for Alice with FedRamp policy”_
 
 1. AI Agent/ LLM Layer
 - Extracts key parameters: service=snowflake, env=SBX, owner=alice
@@ -55,3 +55,34 @@ Agent converts natural language to this JSON (or YAML for CLI):
     "compliance": "fedramp"
   }
 }
+```
+
+---
+
+## 🌐 Equivalent API Call (Agent or ChatOps Trigger)
+
+```bash
+curl -X POST https://platform.company.local/api/v1/provision \
+  -H "Authorization: Bearer $VAULT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d @payload.json
+```
+
+---
+
+## 📦 Example JSON Response (Agent-Friendly)
+```json
+{
+  "status": "provisioning_started",
+  "request_id": "REQ-2025-02-19-12345",
+  "environment": "SBX",
+  "service": "snowflake",
+  "dns_registered": "alice.sbx.govcloud.local",
+  "policy_bundle_applied": "fedramp_sbx_default",
+  "next_actions": [
+    "Query /status/REQ-2025-02-19-12345 for completion",
+    "Review Sentinel enforcement summary via /explain/REQ-2025-02-19-12345"
+  ],
+  "audit_trace_id": "AUD-1740-IRS-FEDRAMP-LOG"
+}
+```
