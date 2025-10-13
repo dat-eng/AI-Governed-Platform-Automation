@@ -86,3 +86,17 @@ curl -X POST https://platform.company.local/api/v1/provision \
   "audit_trace_id": "AUD-1740-IRS-FEDRAMP-LOG"
 }
 ```
+
+---
+
+## 📌 Why This Matters 
+
+I architect platforms in a way that CI pipelines and AI agents can safely trigger provisioning under Zero-Trust — every action is policy-bound, token-scoped, and audit-referenced. That’s how you scale platform automation in regulated environments without losing compliance control.
+
+## 🚀 Future Capability: Agent Governance Loop
+
+Planned (documented in roadmap.md):
+- Agent examines Terraform plan via /explain route before provisioning
+- Agent cross-checks tags & Vault policies against org compliance rules
+- Agent responds back with “Approved to apply” or “Request requires policy elevation”
+- Moves toward LLM-driven policy recommendation (“Based on request, apply hipaa_dev_bundle”)
