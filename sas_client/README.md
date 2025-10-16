@@ -1,10 +1,73 @@
-# 🛠️ SAS Python Automation Toolkit
-
-Modular automation toolkit for infrastructure provisioning in Nutanix, Infoblox and Ansible using GitHub, Python and YAML-based configuration.
+# sas_client — Unified Platform Orchestration Client
+> **Python-based orchestration client that abstracts Terraform, Nutanix Calm, Infoblox, Ansible, and Vault into a single automation interface — designed for Zero-Trust, policy-aware, AI-triggerable provisioning workflows.**
 
 ---
 
-## 🗂️ Directory Structure for sas-client Package
+## 🎯 Purpose
+
+`sas_client` consolidates multiple infrastructure automation tools behind a **clean, Python-based command and API surface**, allowing developers, CI pipelines, or AI agents to trigger compliant platform provisioning without direct access to Vault, Terraform Cloud, or Nutanix consoles.
+
+This client abstracts low-level calls to:
+| System            | Purpose |
+|------------------|--------|
+| **Nutanix Calm** | Provision base infrastructure (VMs, projects, blueprints) |
+| **Terraform + Sentinel** | Apply policy-enforced provisioning templates |
+| **Infoblox** | Reserve IP and register DNS/hostnames |
+| **Vault (Zero-Trust Security)** | Issue short-lived tokens for secure execution |
+| **Ansible Automation** | Bootstrap environment or perform post-provision steps |
+
+---
+
+## 🔐 Zero-Trust Security Model
+
+✅ No static credentials are stored.  
+✅ Every execution requests **ephemeral tokens from Vault**, using `approle` or `jwt` auth.  
+✅ All downstream automation (Terraform, Calm, Infoblox) runs **with least-privilege scoped tokens**.  
+✅ Designed so **AI agents or CI/CD pipelines** can call platform actions **safely without elevated credentials**.
+
+---
+
+## 🚀 Quick Usage (CLI Example)
+
+Provision a Sandbox (SBX) environment with governance tags:
+
+```bash
+sas-client provision env \
+    --type SBX \
+    --owner alice \
+    --policy_bundle fedramp_sbx_default \
+    --vault-token $VAULT_TOKEN \
+    --dns-register true \
+    --tags business_unit=platform compliance=fedramp
+```
+Behind this single command, the client:
+	1.	Authenticates with Vault for scoped credentials.
+	2.	Triggers Nutanix Calm blueprint or Terraform plan selection.
+	3.	Reserves IP in Infoblox, registers DNS (alice.sbx.company.local).
+	4.	Applies tags + policy bundle (fedramp_sbx_default).
+	5.	Logs an auditable trace for compliance.
+    
+```bash
+launcher nutanix -config <path to config/nutanix.yaml>
+```
+
+Use help to get all supported api's using launcher package:
+```bash
+launcher --help
+```
+
+---
+
+🧠 AI + CI/CD Integration
+
+sas_client is designed for agent-triggerable provisioning:
+	•	Can be invoked via GitHub Actions / GitLab CI without exposing credentials.
+	•	Can be called through FastAPI layer (sas_server) for ChatOps / AI agent consumption.
+	•	Output is structured JSON, making it safe for LLM parsing and summarization.
+    
+---
+
+## 🗂️ Project Structure for sas-client Package
 
 ```
 ├── examples
@@ -34,111 +97,22 @@ Modular automation toolkit for infrastructure provisioning in Nutanix, Infoblox 
 
 ---
 
-## ⚙️ Configuration
+📦 CI/CD Packaging
 
-All sample configurations are in the `examples/config/` directory as YAML files.  
-Each automation module (e.g., Nutanix, Infoblox) reads from its respective file:
+A GitHub/GitLab CI pipeline publishes sas_client as a Python package artifact, ready for:
+	•	✅ Internal PIP registry install: pip install sas-client
+	•	✅ Usage inside ephemeral agent containers
+	•	✅ Discovery in Red Hat Developer Hub / Backstage
 
-```yaml
-# config/nutanix.yaml
-base_url: https://calm.example.com/api/nutanix/v3
-username: your_user
-os_type: rhel
-...
-```
+⸻
 
----
+🔭 Roadmap
+	•	Add policy-aware dry-run mode: return Terraform/Sentinel evaluation context only.
+	•	Add explain flag: AI agent-friendly summary of what this provisioning action will do and which policies apply.
+	•	Integrate drift detection + remediation hooks.
 
-## 🚀 Running the CLI
+⸻
 
-You can run launcher either:
+📄 License
 
-### 1️⃣ As a Python package 
-
-#### 📦 Installation
-
-##### 🔹 Option 1: Install with Makefile to use python virtual environment
-
-```bash
-git clone git@github.enterprise.irs.gov:terraform/sas_python.git
-cd sas_python
-make init
-source .venv/bin/activate
-```
-
-For local changes to take effect:
-```bash
-make build
-```
-
-For cleaning up the cache etc:
-```bash
-make clean
-```
-
-For deactivating and exiting the virtual environment:
-```bash
-deactivate
-```
-
-##### 🔹 Option 2: Install in-place (editable) manually
-
-This installs the package in editable mode, so local changes take effect immediately.
-
-```bash
-git clone git@github.enterprise.irs.gov:terraform/sas_python.git
-cd sas_python
-pip install -e .
-```
-
-##### 🔹 Option 3: Install as a standard package manually
-
-```bash
-pip install .
-```
-
-#### 📦 Invoke the installed package
-
-```bash
-launcher nutanix -config <path to config/nutanix.yaml>
-```
-
-Use help to get all supported api's using launcher package:
-```bash
-launcher --help
-```
-
-#### 📦 Uninstall Package
-
-This is only for the manual install without Makefile
-
-```bash
-pip uninstall api
-```
-
-### 2️⃣ Directly using Python (no installation needed) 
-
-Use the main.py entry point to launch a specific module:
-
-```bash
-python main.py nutanix -config <path to config/nutanix.yaml>
-```
-
----
-
-## 🧰 Utility Modules
-
-Located in `src/sas_client/utils/`:
-
-- `logger.py` – metadata logging
-- `hostname_generator.py` – logic for generating compliant hostnames
-- `utils.py` – reusable helpers 
-
----
-
-## ✅ Python Compatibility
-
-- Python 3.8+
-- `requests`, `pyyaml`, `logging`, and standard libraries
-
----
+Apache-2.0 (recommended for government/enterprise automation toolchains)

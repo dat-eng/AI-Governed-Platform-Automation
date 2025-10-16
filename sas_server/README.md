@@ -1,35 +1,31 @@
 
-# sas_server API wrapper
+# sas_server — FastAPI Gateway for AI-Governed Platform Automation
+> **API gateway that exposes Terraform, Calm, Vault, and Infoblox provisioning workflows as secure, agent-triggerable service endpoints.**
+>
+> Designed for **GovCloud, enterprise platform teams, and AI/ChatOps orchestration**, where developers or AI agents can request infrastructure via **natural language → API → Terraform/Vault pipeline**, all under **Zero-Trust, policy-controlled execution**.
 
-This adds a FastAPI layer over your existing CLI code.
+---
 
-## Layout
-- `routes.py` — FastAPI app exposing endpoints for ansible, github, infoblox, nutanix, nexus, and terraform.
-- `requirements.txt` — minimal deps.
+## 🎯 Purpose
 
-## Run
+`sas_server` turns orchestration logic from `sas_client` into a **service layer** — making platform provisioning:
+- **Discoverable** by developers via `/docs` (OpenAPI + Red Hat Developer Hub integration)
+- **Callable by CI/CD** workflows safely (no Vault credentials exposed)
+- **Triggerable by AI Agents** that convert natural language into JSON payloads
+- **Compliant by default**, thanks to Vault-token requirement and Sentinel policy enforcement
 
-1) Ensure Python 3.9+ and install deps:
+> 💡 Think of this as the **“Platform Gateway”** — the endpoint an AI agent, ChatOps bot, or self-service portal talks to, instead of hitting Terraform or Calm directly.
 
-```bash
-pip install -r requirements.txt
-```
+---
 
-2) Install the sas-client package.
+## 🔐 Zero-Trust API Model
 
-```bash
-pip install sas-client
-```
+- Every request **requires a Vault-issued Bearer token** — no static credentials ever stored in server config.
+- Policies applied via **Sentinel / Terraform** bundles control **who can provision what, in which environment**.
+- All requests are **audited with user, policy_bundle, infra scope, and tags**.
 
-3) Start the API server:
-
-```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-4) Hit endpoints:
-
-- Terraform onboarding:
+## 🚀 Example API Call
+#### Terraform onboarding:
 
 ```bash
 curl -X POST http://localhost:8000/api/v1/terraform/onboard \
@@ -49,4 +45,27 @@ curl -X POST http://localhost:8000/api/v1/terraform/onboard \
         "members": ["alice@example.com", "bob@example.com"]
       }'
 ```
+
+## 🧠 AI-Agent Compatibility Notes
+
+sas_server is intentionally designed to support ChatOps/AI governance integration:
+- ✅ LLM-safe JSON responses with explicit fields (status, policy_applied, vault_role_used, next_actions)
+- ✅ “Explain” routes for policy context enable AI reasoning layer
+- ✅ Can be fronted by chat gateway like Slack, MS Teams, or custom LLM
+
+⸻
+
+## 📈 Roadmap (Platform Gateway Enhancements)
+	•	Add /explain plan endpoint → return Terraform/Sentinel JSON for agent summarization
+	•	Add /remediate drift → allow agent to trigger targeted terraform apply within guardrails
+	•	Add event hooks for Backstage/Developer Hub UI integration
+
+⸻
+
+📄 License
+
+Apache-2.0 (consistent with platform tooling repos)
+
+
+
 
