@@ -4,7 +4,6 @@ from functools import lru_cache
 
 from ..api.ansible import AnsibleApi
 from ..api.github import GitHubApi
-from ..api.nexus import NexusApi
 from ..api.nutanix import NutanixApi
 from ..api.terraform import TerraformApi
 from ..config.config_mixer import _list_from_arg
