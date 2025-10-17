@@ -135,10 +135,6 @@ def main():
 
     infoblox_parsers(subparsers)
 
-    nexus_parser = subparsers.add_parser("nexus", help="Get Nexus package data")
-    nexus_parser.add_argument("-config", required=True)
-    nexus_parser.set_defaults(func=nexus_handler)
-
     nutanix_parser = subparsers.add_parser("nutanix.launch_app", help="Launch Nutanix blueprint")
     nutanix_parser.add_argument("-c", "--config_path", required=False, help="Path to config YAML")
     # Optional direct args (Override config if both present)

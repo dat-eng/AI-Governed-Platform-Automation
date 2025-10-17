@@ -25,6 +25,7 @@ where = ["src"]
 
 [project.scripts]
 launcher = "sas_client.cli.cli:main"
+sas-agent = "sas_client.cli.agent_cli:main"
 
 # (Optional) extras, each sourced from its own file—also no duplication
 [project.optional-dependencies]
