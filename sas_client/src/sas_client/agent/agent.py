@@ -2,7 +2,7 @@
 """
 sas_client.agent.agent
 A lightweight AI agent that plans tool calls (Terraform, Ansible, Nutanix/Calm, Vault)
-using sas_client.* APIs. Replace `llm_complete` with your LLM provider.
+using sas_client.* APIs. Need to replace `llm_complete` with a LLM provider.
 
 Usage:
   export SAS_BASE_URL=...
