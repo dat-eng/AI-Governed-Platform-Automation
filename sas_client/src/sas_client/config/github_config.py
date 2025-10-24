@@ -14,8 +14,8 @@ logger = get_logger(__name__)
 @dataclass
 class GitHubBaseConfig:
     token: str
-    base_url: str = _env("GITHUB_BASE_URL", "https://github.enterprise.com")
-    verify: bool = _to_bool(_env("GITHUB_VERIFY_SSL", "true"))
+    base_url: str = _env("GITHUB_BASE_URL", "https://api.github.com")
+    verify: bool = _to_bool(_env("=", "true"))
 
     def as_dict(self) -> Dict[str, Any]:
         return asdict(self)

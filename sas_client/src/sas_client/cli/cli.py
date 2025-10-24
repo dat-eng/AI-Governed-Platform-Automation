@@ -39,6 +39,12 @@ def github_get_project_data(args, config):
         args.owner, args.repo, args.project_name, args.os_type, user_config=config
     )
 
+def github_get_file_text(args, config):
+    github = get_github_instance()
+    content = github.get_file_text(
+        args.owner, args.repo, args.path, args.ref, user_config=config
+    )
+    print(content)
 
 def infoblox_parsers(subparsers):
     host_exists_parser = subparsers.add_parser(
@@ -132,6 +138,15 @@ def main():
     github_parser.add_argument("-p", "--project_name", required=False, help="Project Name")
     github_parser.add_argument("-os", "--os_type", required=False, help="OS Type")
     github_parser.set_defaults(func=github_get_project_data)
+
+    github_cat_parser = subparsers.add_parser("github.get_file_text", help="Cat README file")
+    github_cat_parser.add_argument("-c", "--config_path", required=False, help="Path to config YAML")
+    # Optional direct args (Override config if both present)
+    github_cat_parser.add_argument("-o", "--owner", required=False, help="GitHub Repository Owner")
+    github_cat_parser.add_argument("-r", "--repo", required=False, help="GitHub Repository")
+    github_cat_parser.add_argument("-p", "--path", required=False, help="Path")
+    github_cat_parser.add_argument("-rf", "--ref", required=False, help="Ref Branch")
+    github_cat_parser.set_defaults(func=github_get_file_text)
 
     infoblox_parsers(subparsers)
 
