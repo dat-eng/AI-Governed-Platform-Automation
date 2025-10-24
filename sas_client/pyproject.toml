@@ -26,6 +26,9 @@ where = ["src"]
 [project.scripts]
 launcher = "sas_client.cli.cli:main"
 sas-agent = "sas_client.cli.agent_cli:main"
+sas-index-github-file = "sas_client.cli.sas_index_github_file:main"
+sas-search            = "sas_client.cli.sas_search:main"
+sas-agent-rag         = "sas_client.cli.sas_agent_rag:main"
 
 # (Optional) extras, each sourced from its own file—also no duplication
 [project.optional-dependencies]

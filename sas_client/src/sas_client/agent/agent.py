@@ -18,6 +18,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Callable, TypedDict, Literal
 import os, json, time, sys, traceback
+import logging
+import requests
+
+from openai import OpenAI
 
 # --- Import sas_client APIs ---
 from sas_client.api.common.api_client import APIClient, APIClientConfig
@@ -26,6 +30,7 @@ from sas_client.api.terraform import TerraformApi
 from sas_client.api.ansible import AnsibleApi
 from sas_client.api.nutanix import NutanixApi
 
+logger = logging.getLogger(__name__)
 # ---------------------------- Config / Context -------------------------------
 
 class Ctx(TypedDict, total=False):
@@ -126,7 +131,143 @@ SYSTEM_PROMPT = """You are a careful ops agent for sas_client.
   FINAL: "<concise answer>"
 Tools: vault_read(path, mount?, field?), terraform_run(organization, workspace, action?, variables?), ansible_run(job_template, extra_vars, poll?), calm_launch(blueprint_name, project, inputs)
 """
+DEFAULT_MODEL = os.getenv("SAS_AGENT_MODEL", "gpt-4o-mini")  # used when backend=openai
+OLLAMA_MODEL  = os.getenv("OLLAMA_MODEL", "llama3")          # default local model
+OLLAMA_BASE   = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 
+BACKEND = os.getenv("SAS_AGENT_BACKEND", "openai").lower()   # "openai" | "ollama"
+
+def _answer_openai(
+    prompt: str,
+    system: Optional[str],
+    *,
+    model: Optional[str],
+    temperature: float,
+    max_tokens: int,
+    timeout: Optional[float],
+) -> str:
+    # Reuse your existing OpenAI client path here
+    from openai import OpenAI
+    client = OpenAI(timeout=timeout)
+    mdl = model or DEFAULT_MODEL
+
+    messages = []
+    if system:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": prompt})
+
+    resp = client.chat.completions.create(
+        model=mdl,
+        messages=messages,
+        temperature=temperature,
+        max_tokens=max_tokens,
+    )
+    return (resp.choices[0].message.content or "").strip()
+
+def _answer_ollama(
+    prompt: str,
+    system: Optional[str],
+    *,
+    model: Optional[str],
+    temperature: float,
+    max_tokens: int,
+    timeout: Optional[float],
+) -> str:
+    """
+    Call local Ollama chat endpoint. No costs, no quotas.
+    """
+    mdl = model or OLLAMA_MODEL
+    msgs = []
+    if system:
+        msgs.append({"role": "system", "content": system})
+    msgs.append({"role": "user", "content": prompt})
+
+    payload = {
+        "model": mdl,
+        "messages": msgs,
+        "stream": False,  # simplify
+        "options": {"temperature": float(temperature)},
+    }
+    if max_tokens:
+        # Ollama uses num_predict for max new tokens
+        payload["options"]["num_predict"] = int(max_tokens)
+
+    try:
+        r = requests.post(f"{OLLAMA_BASE}/api/chat", json=payload, timeout=timeout or 60)
+        r.raise_for_status()
+        data = r.json()
+        text = (data.get("message", {}).get("content") or "").strip()
+        if not text:
+            raise RuntimeError(f"Ollama returned no content: {data}")
+        return text
+    except requests.ConnectionError as e:
+        raise RuntimeError(
+            f"Cannot reach Ollama at {OLLAMA_BASE}. "
+            f"Is it running? Try: `ollama pull {mdl}` then `ollama run {mdl} 'hi'`"
+        ) from e
+
+def answer(
+    prompt: str,
+    system: Optional[str] = None,
+    *,
+    model: Optional[str] = None,
+    temperature: float = 0.2,
+    max_tokens: int = 800,
+    timeout: Optional[float] = 60.0,
+) -> str:
+    """
+    Unified entrypoint. Selects backend via SAS_AGENT_BACKEND.
+    """
+    print(f'AI Model: {BACKEND}')
+    if BACKEND == "ollama":
+        return _answer_ollama(prompt, system, model=model, temperature=temperature,
+                              max_tokens=max_tokens, timeout=timeout)
+    # default: openai
+    return _answer_openai(prompt, system, model=model, temperature=temperature,
+                          max_tokens=max_tokens, timeout=timeout)
+
+# _client = OpenAI()  # uses OPENAI_API_KEY from env
+
+def llm_complete(system: str, messages: list[dict[str, str]]) -> str:
+    """
+    Calls OpenAI's Responses API.
+    The prompt instructs the model to return ONLY one of:
+      - TOOLS: {"name":"...","args":{...}}
+      - FINAL: "some concise answer"
+    """
+    # Harden the “contract” so the model sticks to your parser.
+    guard = (
+        "You MUST respond with exactly one line.\n"
+        "Choose ONE of these formats ONLY:\n"
+        "1) TOOLS: {\"name\":\"<tool>\",\"args\":{...}}\n"
+        "2) FINAL: \"<concise answer>\"\n"
+        "Never include extra text or markdown.\n"
+        "Tools you may use: vault_read, terraform_run, ansible_run, calm_launch.\n"
+        "If action is destructive (e.g., terraform apply) and not explicitly allowed, "
+        "ask for confirmation using FINAL.\n"
+    )
+
+    # Build input for the Responses API
+    inputs = [
+        {"role": "system", "content": system + "\n\n" + guard},
+        *messages  # e.g., {"role":"user","content":"..."} + any tool reflections you append
+    ]
+
+    # Choose a sensible default model (cheap + good at tool-planning)
+    # You can bump to 'gpt-4o' if you want stronger planning.
+    resp = _client.responses.create(
+        model="gpt-4o-mini",
+        input=inputs,
+        temperature=0.2,
+        max_output_tokens=400,
+        # We want plain text we can parse (your agent expects strings)
+        response_format={ "type": "text" },
+    )
+
+    # `output_text` is a convenience field with the concatenated text
+    return resp.output_text.strip()
+    
+'''
 def llm_complete(system: str, messages: List[Dict[str, str]]) -> str:
     """
     Replace with a real model (OpenAI/Azure/local). For now, a heuristic:
@@ -143,7 +284,7 @@ def llm_complete(system: str, messages: List[Dict[str, str]]) -> str:
     if "vault" in text:
         return 'TOOLS: {"name":"vault_read","args":{"mount":"kvv2","path":"sssd/endpoints/aap"}}'
     return 'FINAL: Ready. Plug in your real LLM provider in llm_complete().'
-
+'''
 
 # ------------------------------- Agent Loop ----------------------------------
 

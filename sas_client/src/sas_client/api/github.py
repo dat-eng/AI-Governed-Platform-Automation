@@ -20,7 +20,7 @@ class GitHubApi:
 
     PATH_VERSION: Final[str] = "/api/v3"
     PATH_GITHUB_PROJECTS_TEMPLATE: Final[str] = (
-        f"{PATH_VERSION}/repos/{{owner}}/{{repo}}/contents/projects"
+        f"{PATH_VERSION}/repos/{{owner}}/{{repo}}/contents"
     )
 
     def __init__(self):
@@ -96,6 +96,34 @@ class GitHubApi:
         )
 
         return validation
+
+    from base64 import b64decode
+
+    def get_file_text(
+       self,
+       owner: str,
+       repo: str,
+       path: str,
+       ref: str = "main",
+       user_config: dict = None,
+    )  ->  str:
+        """
+        Return the decoded text content of a file from GitHub.
+        Uses the GitHub 'contents' API and decodes base64 payload.
+        """
+       
+        endpoint = f"/repos/{owner}/{repo}/contents/{path}"
+        # APIClient already carries base_url=https://api.github.com and Bearer token
+        data = self.client.get(
+           endpoint,
+           params={"ref": ref}
+        )
+        if data.get("type") != "file":
+            raise ValueError(f"{path} is not a file")
+        content = data.get("content", "")
+        if data.get("encoding") == "base64":
+            return b64decode(content).decode("utf-8", errors="ignore")
+        return content or ""
 
     def get_project_data(
         self,

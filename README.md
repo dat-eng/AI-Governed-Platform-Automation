@@ -1,7 +1,7 @@
 # AI-Governed Platform Automation
 > **Intelligent, Zero-Trust provisioning framework for data platforms using Terraform, Nutanix Calm, Vault, FastAPI, and agent-triggerable APIs.**
 >
-> Designed for **GovCloud, financial, and regulated enterprise environments** where **self-service automation must still enforce compliance (FedRAMP, FISMA, HIPAA, SOC2)**.
+> Designed for **GovCloud, financial, and regulated enterprise environments** where **self-service automation must still enforce compliance (HIPAA, SOC2)**.
 
 ---
 
