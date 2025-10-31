@@ -83,7 +83,7 @@ curl -X POST https://platform.company.local/api/v1/provision \
     "Query /status/REQ-2025-02-19-12345 for completion",
     "Review Sentinel enforcement summary via /explain/REQ-2025-02-19-12345"
   ],
-  "audit_trace_id": "AUD-1740-IRS-FEDRAMP-LOG"
+  "audit_trace_id": "AUD-1740-LOG"
 }
 ```
 

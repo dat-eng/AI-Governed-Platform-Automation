@@ -44,8 +44,8 @@ def _get(
 def _extract_initials(email: str) -> Tuple[str, str]:
     """
     Extract initials according to the organization's convention:
-      - firstname.lastname@irs.gov
-      - firstname.middleinitial.lastname@irs.gov
+      - firstname.lastname@sm.com
+      - firstname.middleinitial.lastname@sm.com
 
     Returns:
         (first_initial, last_initial) in lowercase.
@@ -66,8 +66,8 @@ def _extract_initials(email: str) -> Tuple[str, str]:
     m = re.match(pattern, email)
     if not m:
         raise ValueError(
-            "Owner email must be 'firstname.lastname@irs.gov' or "
-            "'firstname.middleinitial.lastname@irs.gov' (case-insensitive). "
+            "Owner email must be 'firstname.lastname@sm.com' or "
+            "'firstname.middleinitial.lastname@sm.com' (case-insensitive). "
             f"Got: {email!r}"
         )
     firstname, _middle, lastname = m.groups()

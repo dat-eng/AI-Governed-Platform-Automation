@@ -1,4 +1,4 @@
-FROM ecp-non-prod.nexus-ecp.web.irs.gov/ubi9/python-312:9.6-1756995774-qcs-247
+FROM ecp-non-prod.nexus-ecp.web.sm.com/ubi9/python-312:9.6-1756995774-qcs-247
 
 # Set working directory early
 WORKDIR /app
