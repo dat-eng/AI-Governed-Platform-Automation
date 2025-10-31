@@ -63,9 +63,3 @@ sas_server is intentionally designed to support ChatOps/AI governance integratio
 ⸻
 
 📄 License
-
-Apache-2.0 (consistent with platform tooling repos)
-
-
-
-

@@ -1,7 +1,7 @@
 # AI-Governed Platform Automation
 > **Intelligent, Zero-Trust provisioning framework for data platforms using Terraform, Nutanix Calm, Vault, FastAPI, and agent-triggerable APIs.**
 >
-> Designed for **GovCloud, financial, and regulated enterprise environments** where **self-service automation must still enforce compliance (HIPAA, SOC2)**.
+> Designed for regulated enterprise environments where **self-service automation must still enforce compliance (HIPAA, SOC2)**.
 
 ---
 
@@ -45,7 +45,6 @@ This framework turns platform actions like *“Provision Snowflake SBX with Vaul
 | Control Area                     | How This Framework Enforces It                                              |
 |--------------------------------|----------------------------------------------------------------------------|
 | **Zero-Trust Access**          | Vault-issued ephemeral tokens replace static credentials                   |
-| **FedRAMP/FISMA Alignment**    | Sentinel policies + audit logs on every Terraform/Calm call                |
 | **Auditability**               | All requests logged via FastAPI layer with user + policy context           |
 | **Separation of Duties**       | API gateway separates intent submission from provisioning execution        |
 | **Agent-Safe Execution**       | Every action exposed via scoped endpoints safe for AI/ChatOps triggering  |
@@ -120,12 +119,6 @@ ai-governed-platform-automation/
 	•	🚀 Next: Agent intent → auto-map to policy bundles (fedramp_sbx, hipaa_dev, etc.)
 	•	🎯 Future: Drift detection + automatic Terraform plan review via AI agent
 	•	🧠 Stretch Goal: “Explain this provisioning plan” — agent explains the compliance posture of a requested build
-
-⸻
-
-📄 License
-
-Apache-2.0 (recommended for platform tooling repositories exposed publicly)
 
 ⸻
 

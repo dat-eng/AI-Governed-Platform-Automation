@@ -24,7 +24,7 @@ This system abstracts Terraform, Nutanix Calm, Vault, Sentinel, Infoblox, and An
    - Requests Vault secrets / tokens (short-lived)
    - Registers DNS/IP via Infoblox
    - Optionally triggers Ansible / post-setup automation
-4. Provisioned Infrastructure (GovCloud / Cloud / On-Prem / Hybrid)
+4. Provisioned Infrastructure (Cloud / On-Prem / Hybrid)
    - Tagged + logged for audit
    - Returns structured response for agents / dashboards
 
@@ -60,7 +60,7 @@ This system abstracts Terraform, Nutanix Calm, Vault, Sentinel, Infoblox, and An
 
 ## 🎙 Architecture Explained
 
-I designed the platform so that no engineer directly interacts with Terraform, Calm, or Vault. Instead, we expose a secure orchestration surface — FastAPI for agent/API calls and a CLI wrapper for CI pipelines. Every provisioning request is associated with a policy bundle like `fedramp_sbx_default`, which determines what Terraform modules and Vault roles can be invoked. This architecture allows the same workflows to be triggered by developers, GitHub Actions, or even AI agents without compromising compliance or exposing credentials.
+I designed the platform so that no engineer directly interacts with Terraform, Calm, or Vault. Instead, we expose a secure orchestration surface — FastAPI for agent/API calls and a CLI wrapper for CI pipelines. Every provisioning request is associated with a policy bundle like `sbx_default`, which determines what Terraform modules and Vault roles can be invoked. This architecture allows the same workflows to be triggered by developers, GitHub Actions, or even AI agents without compromising compliance or exposing credentials.
 
 ---
 

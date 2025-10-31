@@ -15,7 +15,6 @@ from .github import github_router
 from .infoblox import infoblox_router
 from .nutanix import nutanix_router
 from .terraform import terraform_router
-from .openshift import openshift_router
 
 
 v1_router = APIRouter(prefix="/v1")
@@ -25,4 +24,3 @@ v1_router.include_router(github_router)
 v1_router.include_router(infoblox_router)
 v1_router.include_router(nutanix_router)
 v1_router.include_router(terraform_router)
-v1_router.include_router(openshift_router)

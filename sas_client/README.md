@@ -32,10 +32,10 @@ This client abstracts low-level calls to:
 Provision a Sandbox (SBX) environment with governance tags:
 
 ```bash
-sas-client provision env \
+launcher provision env \
     --type SBX \
     --owner alice \
-    --policy_bundle fedramp_sbx_default \
+    --policy_bundle sbx_default \
     --vault-token $VAULT_TOKEN \
     --dns-register true \
     --tags business_unit=platform compliance=fedramp
@@ -44,7 +44,7 @@ Behind this single command, the client:
 	1.	Authenticates with Vault for scoped credentials.
 	2.	Triggers Nutanix Calm blueprint or Terraform plan selection.
 	3.	Reserves IP in Infoblox, registers DNS (alice.sbx.company.local).
-	4.	Applies tags + policy bundle (fedramp_sbx_default).
+	4.	Applies tags + policy bundle.
 	5.	Logs an auditable trace for compliance.
     
 ```bash
@@ -111,8 +111,3 @@ A GitHub/GitLab CI pipeline publishes sas_client as a Python package artifact, r
 	•	Add explain flag: AI agent-friendly summary of what this provisioning action will do and which policies apply.
 	•	Integrate drift detection + remediation hooks.
 
-⸻
-
-📄 License
-
-Apache-2.0 (recommended for government/enterprise automation toolchains)

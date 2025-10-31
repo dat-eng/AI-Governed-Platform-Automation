@@ -8,7 +8,7 @@
 
 Allow a developer or AI agent to request:
 
-> _“Provision a Snowflake SBX environment for Alice under FedRamp policy with DNS registration.”_
+> _“Provision a Snowflake SBX environment for Alice under PROD policy with DNS registration.”_
 
 …and have the platform convert that into a **secured, policy-governed API call** without exposing Terraform, Vault, or Calm directly.
 
@@ -16,11 +16,11 @@ Allow a developer or AI agent to request:
 
 ## 🧠 Natural Language to API Translation (Conceptual Flow)
 
- > _“Provision a Snowflake SBX environment for Alice with FedRamp policy”_
+ > _“Provision a Snowflake SBX environment for Alice with SBX policy”_
 
 1. AI Agent/ LLM Layer
 - Extracts key parameters: service=snowflake, env=SBX, owner=alice
-- Maps intent to known policy bundle: fedramp_sbx_default
+- Maps intent to known policy bundle: sbx_default
 - Generates JSON payload for API
 
 2. FastAPI Gateway (sas_server)

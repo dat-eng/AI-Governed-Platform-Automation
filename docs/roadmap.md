@@ -38,13 +38,13 @@
 | **Stage 2 — Agent-Explained Policies** | Agent can call `/explain plan` before provisioning and **justify action to compliance teams** | Improves trust and audit transparency |
 | **Stage 3 — Agent Remediation** | AI detects drift and calls remediation API under policy guard | Moves toward **self-healing platform** |
 | **Stage 4 — Agent-Suggested Policy Bundles** | AI recommends policy bundles based on environment and compliance tag | Reduces human cognitive load on provisioning design |
-| **Stage 5 — Policy-as-Knowledge Graph** | Agent explains **“why this policy exists”** and links to regulatory requirement (FedRAMP AC-3, HIPAA §164.312) | True **AI-compliance governance layer** |
+| **Stage 5 — Policy-as-Knowledge Graph** | Agent explains **“why this policy exists”** and links to regulatory requirement (HIPAA §164.312) | True **AI-compliance governance layer** |
 
 ---
 
 ## 🎙 Architecture Vision Statement (Use in Interviews)
 
-> *“The long-term goal is not just to provide automation, but to build a **governed platform surface** where human developers or AI agents can participate safely in infrastructure provisioning, explain their decisions, and operate within compliance boundaries — without needing manual oversight. That’s how I see modern GovCloud/enterprise platforms evolving.”*
+> *“The long-term goal is not just to provide automation, but to build a **governed platform surface** where human developers or AI agents can participate safely in infrastructure provisioning, explain their decisions, and operate within compliance boundaries — without needing manual oversight. That’s how I see modern Cloud/enterprise platforms evolving.”*
 
 ---
 

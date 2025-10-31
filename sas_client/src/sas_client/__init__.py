@@ -56,9 +56,6 @@ __all__ = [
     "InfobloxApi",
     "NexusApi",
     "NutanixApi",
-    "NutanixSDK",
-    "NutanixClient",
-    "NutanixConfig",
     "TerraformApi",
     # Metadata helpers
     "package_info",
@@ -71,11 +68,7 @@ _LAZY_MAP = {
     "AnsibleApi": ("sas_client.api.ansible", "AnsibleApi"),
     "GitHubApi": ("sas_client.api.github", "GitHubApi"),
     "InfobloxApi": ("sas_client.api.infoblox", "InfobloxApi"),
-    "NexusApi": ("sas_client.api.nexus", "NexusApi"),
     "NutanixApi": ("sas_client.api.nutanix", "NutanixApi"),
-    "NutanixSDK": ("sas_client.api.nutanix_sdk", "NutanixSDK"),
-    "NutanixClient": ("sas_client.api.nutanix_client", "NutanixClient"),
-    "NutanixConfig": ("sas_client.api.nutanix_client", "NutanixConfig"),
     "TerraformApi": ("sas_client.api.terraform", "TerraformApi"),
 }
 
@@ -102,8 +95,5 @@ if TYPE_CHECKING:
     from sas_client.api.ansible import AnsibleApi
     from sas_client.api.github import GitHubApi
     from sas_client.api.infoblox import InfobloxApi
-    from sas_client.api.nexus import NexusApi
     from sas_client.api.nutanix import NutanixApi
-    from sas_client.api.nutanix_client import NutanixClient, NutanixConfig
-    from sas_client.api.nutanix_sdk import NutanixSDK
     from sas_client.api.terraform import TerraformApi
