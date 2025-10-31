@@ -61,7 +61,7 @@ def _extract_initials(email: str) -> Tuple[str, str]:
         r"^([a-z]+)"  # firstname
         r"(?:\.([a-z]))?"  # optional .m (middle initial)
         r"\.([a-z]+)"  # .lastname
-        r"@irs\.gov$"  # strict domain
+        r"@sm\.com$"  # strict domain
     )
     m = re.match(pattern, email)
     if not m:
